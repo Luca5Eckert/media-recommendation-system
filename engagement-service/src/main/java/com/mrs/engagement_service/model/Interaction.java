@@ -17,10 +17,10 @@ public class Interaction {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private final Long id;
+    private Long id;
 
     @Column(nullable = false)
-    private final UUID userId;
+    private UUID userId;
 
     @Column(nullable = false)
     private Long movieId;
@@ -31,8 +31,6 @@ public class Interaction {
     private LocalDateTime timestamp;
 
     public Interaction() {
-        this.id = null;
-        this.userId = null;
     }
 
 }

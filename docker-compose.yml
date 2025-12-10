@@ -1,17 +1,18 @@
 version: '3.8'
 services:
-  # 1. Banco de Dados (PostgreSQL)
   postgres:
     image: postgres:15
     container_name: media-db
     environment:
       POSTGRES_USER: user
       POSTGRES_PASSWORD: password
-      POSTGRES_DB: mediadb
+      POSTGRES_DB: default_db
     ports:
-      - "5432:5432" # Porta externa : Porta interna do container
+      - "5432:5432"
+    volumes:
+      - ./scripts:/docker-entrypoint-initdb.d
+      - postgres_data:/var/lib/postgresql/data
 
-  # 2. Zookeeper (Gerente do Kafka - necessário para versões mais antigas/estáveis)
   zookeeper:
     image: confluentinc/cp-zookeeper:7.3.0
     container_name: zookeeper
@@ -19,7 +20,6 @@ services:
       ZOOKEEPER_CLIENT_PORT: 2181
       ZOOKEEPER_TICK_TIME: 2000
 
-  # 3. Kafka (O Carteiro das Mensagens)
   kafka:
     image: confluentinc/cp-kafka:7.3.0
     container_name: kafka
@@ -33,3 +33,6 @@ services:
       KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:9092,PLAINTEXT_INTERNAL://kafka:29092
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_INTERNAL:PLAINTEXT
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+
+volumes:
+  postgres_data:
