@@ -23,7 +23,7 @@ public class Interaction {
     private UUID userId;
 
     @Column(nullable = false)
-    private Long movieId;
+    private UUID movieId;
 
     @Enumerated(EnumType.STRING)
     private InteractionType type;
@@ -33,4 +33,10 @@ public class Interaction {
     public Interaction() {
     }
 
+    public Interaction(UUID userId, UUID movieId, InteractionType type, LocalDateTime timestamp) {
+        this.userId = userId;
+        this.movieId = movieId;
+        this.type = type;
+        this.timestamp = timestamp;
+    }
 }
