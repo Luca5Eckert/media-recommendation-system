@@ -13,9 +13,9 @@ public class CreateEngagementHandler {
 
     private final EngagementRepository engagementRepository;
 
-    private final KafkaTemplate<UUID, InteractionEvent> kafka;
+    private final KafkaTemplate<String, InteractionEvent> kafka;
 
-    public CreateEngagementHandler(EngagementRepository engagementRepository, KafkaTemplate<UUID, InteractionEvent> kafka) {
+    public CreateEngagementHandler(EngagementRepository engagementRepository, KafkaTemplate<String, InteractionEvent> kafka) {
         this.engagementRepository = engagementRepository;
         this.kafka = kafka;
     }
@@ -33,7 +33,7 @@ public class CreateEngagementHandler {
                 interaction.getTimestamp()
         );
 
-        kafka.send("engagement-created", interaction.getUserId(), interactionEvent);
+        kafka.send("engagement-created", interaction.getUserId().toString(), interactionEvent);
     }
 
 }
