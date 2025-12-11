@@ -1,5 +1,6 @@
 package com.mrs.engagement_service.handler;
 
+import com.mrs.engagement_service.event.InteractionEvent;
 import com.mrs.engagement_service.model.Interaction;
 import com.mrs.engagement_service.repository.EngagementRepository;
 import org.springframework.kafka.core.KafkaTemplate;
@@ -12,9 +13,9 @@ public class CreateEngagementHandler {
 
     private final EngagementRepository engagementRepository;
 
-    private final KafkaTemplate<UUID, Interaction> kafka;
+    private final KafkaTemplate<UUID, InteractionEvent> kafka;
 
-    public CreateEngagementHandler(EngagementRepository engagementRepository, KafkaTemplate<UUID, Interaction> kafka) {
+    public CreateEngagementHandler(EngagementRepository engagementRepository, KafkaTemplate<UUID, InteractionEvent> kafka) {
         this.engagementRepository = engagementRepository;
         this.kafka = kafka;
     }
@@ -22,9 +23,17 @@ public class CreateEngagementHandler {
     public void handler(Interaction interaction){
         if(interaction == null) throw new IllegalArgumentException("Interaction can't be null");
 
-        kafka.send("create-engagement", interaction.getUserId(), interaction);
-
         engagementRepository.save(interaction);
+
+        InteractionEvent interactionEvent = new InteractionEvent(
+                interaction.getId(),
+                interaction.getUserId(),
+                interaction.getMediaId(),
+                interaction.getType(),
+                interaction.getTimestamp()
+        );
+
+        kafka.send("engagement-created", interaction.getUserId(), interactionEvent);
     }
 
 }
