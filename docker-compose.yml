@@ -63,7 +63,7 @@ services:
       SPRING_DATASOURCE_URL: 'jdbc:postgresql://postgres:5432/catalog_db'
       SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER}
       SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD}
-      SERVER_PORT: 8082
+      SERVER_PORT: 8080
     depends_on:
       postgres:
         condition: service_healthy
@@ -88,6 +88,24 @@ services:
         condition: service_healthy
       kafka:
         condition: service_started
+
+  user-service:
+    build:
+      context: ./user-service
+      dockerfile: Dockerfile
+    container_name: user-service
+    ports:
+      - "8084:8080"
+    env_file:
+      - .env
+    environment:
+      SPRING_DATASOURCE_URL: 'jdbc:postgresql://postgres:5432/user_db'
+      SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER}
+      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD}
+      SERVER_PORT: 8080
+    depends_on:
+      postgres:
+        condition: service_healthy
 
 volumes:
   postgres_data:
