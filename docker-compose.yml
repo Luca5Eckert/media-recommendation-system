@@ -57,7 +57,7 @@ services:
     container_name: catalog-service
     ports:
       - "8081:8082"
-    env_file: # <--- CORRIGIDO: Adicionado dentro do serviço
+    env_file:
       - .env
     environment:
       SPRING_DATASOURCE_URL: 'jdbc:postgresql://postgres:5432/catalog_db'
