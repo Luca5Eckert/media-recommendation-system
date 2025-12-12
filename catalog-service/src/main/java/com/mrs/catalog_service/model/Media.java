@@ -3,11 +3,12 @@ package com.mrs.catalog_service.model;
 import jakarta.persistence.*;
 import lombok.Data;
 
+import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 
 @Entity
-@Table(name = "tb_media")
+@Table(name = "medias")
 @Data
 public class Media {
 
@@ -15,9 +16,25 @@ public class Media {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private UUID id;
 
-    private String name;
+    private String title;
 
-    private double timeInMinutes;
+    private String description;
+
+    private int releaseYear;
+
+    @Enumerated(EnumType.STRING)
+    private MediaType mediaType;
+
+    private String cover_url;
+
+    @Version
+    private long version;
+
+    private Instant createAt;
+
+    private Instant updateAt;
+
+    private Instant deletedAt;
 
     @ElementCollection
     @CollectionTable(
@@ -31,10 +48,5 @@ public class Media {
     public Media() {
     }
 
-    public Media(String name, double timeInMinutes, List<Genre> genres) {
-        this.name = name;
-        this.timeInMinutes = timeInMinutes;
-        this.genres = genres;
-    }
 
 }
