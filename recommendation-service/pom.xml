@@ -2,248 +2,250 @@
 
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 
-		 xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
 
-	<modelVersion>4.0.0</modelVersion>
+    <modelVersion>4.0.0</modelVersion>
 
-	<parent>
+    <parent>
 
-		<groupId>org.springframework.boot</groupId>
+        <groupId>org.springframework.boot</groupId>
 
-		<artifactId>spring-boot-starter-parent</artifactId>
+        <artifactId>spring-boot-starter-parent</artifactId>
 
-		<version>4.0.0</version>
+        <version>4.0.0</version>
 
-		<relativePath/> <!-- lookup parent from repository -->
+        <relativePath/> <!-- lookup parent from repository -->
 
-	</parent>
+    </parent>
 
-	<groupId>com.mrs</groupId>
+    <groupId>com.mrs</groupId>
 
-	<artifactId>recommendation-service</artifactId>
+    <artifactId>recommendation-service</artifactId>
 
-	<version>0.0.1-SNAPSHOT</version>
+    <version>0.0.1-SNAPSHOT</version>
 
-	<name>recommendation-service</name>
+    <name>recommendation-service</name>
 
-	<description>Demo project for Spring Boot</description>
+    <description>Demo project for Spring Boot</description>
 
-	<url/>
+    <url/>
 
-	<licenses>
+    <licenses>
 
-		<license/>
+        <license/>
 
-	</licenses>
+    </licenses>
 
-	<developers>
+    <developers>
 
-		<developer/>
+        <developer/>
 
-	</developers>
+    </developers>
 
-	<scm>
+    <scm>
 
-		<connection/>
+        <connection/>
 
-		<developerConnection/>
+        <developerConnection/>
 
-		<tag/>
+        <tag/>
 
-		<url/>
+        <url/>
 
-	</scm>
+    </scm>
 
-	<properties>
+    <properties>
 
-		<java.version>21</java.version>
+        <java.version>21</java.version>
 
-	</properties>
+    </properties>
 
-	<dependencies>
+    <dependencies>
 
-		<dependency>
+        <dependency>
 
-			<groupId>org.springframework.boot</groupId>
+            <groupId>org.springframework.boot</groupId>
 
-			<artifactId>spring-boot-h2console</artifactId>
+            <artifactId>spring-boot-h2console</artifactId>
 
-		</dependency>
+        </dependency>
 
-		<dependency>
+        <dependency>
 
-			<groupId>org.springframework.boot</groupId>
+            <groupId>org.springframework.boot</groupId>
 
-			<artifactId>spring-boot-starter-data-jpa</artifactId>
+            <artifactId>spring-boot-starter-data-jpa</artifactId>
 
-		</dependency>
+        </dependency>
 
-		<dependency>
+        <dependency>
 
-			<groupId>org.springframework.boot</groupId>
+            <groupId>org.springframework.boot</groupId>
 
-			<artifactId>spring-boot-starter-kafka</artifactId>
+            <artifactId>spring-boot-starter-kafka</artifactId>
 
-		</dependency>
+        </dependency>
 
-		<dependency>
+        <dependency>
 
-			<groupId>org.springframework.boot</groupId>
+            <groupId>org.springframework.boot</groupId>
 
-			<artifactId>spring-boot-starter-validation</artifactId>
+            <artifactId>spring-boot-starter-validation</artifactId>
 
-		</dependency>
+        </dependency>
 
-		<dependency>
+        <dependency>
 
-			<groupId>org.springframework.boot</groupId>
+            <groupId>org.springframework.boot</groupId>
 
-			<artifactId>spring-boot-starter-webmvc</artifactId>
+            <artifactId>spring-boot-starter-webmvc</artifactId>
 
-		</dependency>
+        </dependency>
 
 
+        <dependency>
 
-		<dependency>
+            <groupId>com.h2database</groupId>
 
-			<groupId>com.h2database</groupId>
+            <artifactId>h2</artifactId>
 
-			<artifactId>h2</artifactId>
+            <scope>runtime</scope>
 
-			<scope>runtime</scope>
+        </dependency>
 
-		</dependency>
+        <dependency>
 
-		<dependency>
+            <groupId>org.postgresql</groupId>
 
-			<groupId>org.postgresql</groupId>
+            <artifactId>postgresql</artifactId>
 
-			<artifactId>postgresql</artifactId>
+            <scope>runtime</scope>
 
-			<scope>runtime</scope>
+        </dependency>
 
-		</dependency>
+        <dependency>
 
-		<dependency>
+            <groupId>org.projectlombok</groupId>
 
-			<groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
 
-			<artifactId>lombok</artifactId>
+            <optional>true</optional>
 
-			<optional>true</optional>
+        </dependency>
 
-		</dependency>
+        <dependency>
 
-		<dependency>
+            <groupId>org.springframework.boot</groupId>
 
-			<groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-data-jpa-test</artifactId>
 
-			<artifactId>spring-boot-starter-data-jpa-test</artifactId>
+            <scope>test</scope>
 
-			<scope>test</scope>
+        </dependency>
 
-		</dependency>
+        <dependency>
 
-		<dependency>
+            <groupId>org.springframework.boot</groupId>
 
-			<groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-kafka-test</artifactId>
 
-			<artifactId>spring-boot-starter-kafka-test</artifactId>
+            <scope>test</scope>
 
-			<scope>test</scope>
+        </dependency>
 
-		</dependency>
+        <dependency>
 
-		<dependency>
+            <groupId>org.springframework.boot</groupId>
 
-			<groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-validation-test</artifactId>
 
-			<artifactId>spring-boot-starter-validation-test</artifactId>
+            <scope>test</scope>
 
-			<scope>test</scope>
+        </dependency>
 
-		</dependency>
+        <dependency>
 
-		<dependency>
+            <groupId>org.springframework.boot</groupId>
 
-			<groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-webmvc-test</artifactId>
 
-			<artifactId>spring-boot-starter-webmvc-test</artifactId>
+            <scope>test</scope>
 
-			<scope>test</scope>
+        </dependency>
 
-		</dependency>
 
+        <dependency>
 
+            <groupId>com.fasterxml.jackson.core</groupId>
 
-		<dependency>
+            <artifactId>jackson-databind</artifactId>
 
-			<groupId>com.fasterxml.jackson.core</groupId>
+        </dependency>
 
-			<artifactId>jackson-databind</artifactId>
+        <dependency>
+            <groupId>io.hypersistence</groupId>
+            <artifactId>hypersistence-utils-hibernate-63</artifactId>
+            <version>3.7.0</version>
+        </dependency>
 
-		</dependency>
+    </dependencies>
 
-	</dependencies>
 
+    <build>
 
+        <plugins>
 
-	<build>
+            <plugin>
 
-		<plugins>
+                <groupId>org.apache.maven.plugins</groupId>
 
-			<plugin>
+                <artifactId>maven-compiler-plugin</artifactId>
 
-				<groupId>org.apache.maven.plugins</groupId>
+                <configuration>
 
-				<artifactId>maven-compiler-plugin</artifactId>
+                    <annotationProcessorPaths>
 
-				<configuration>
+                        <path>
 
-					<annotationProcessorPaths>
+                            <groupId>org.projectlombok</groupId>
 
-						<path>
+                            <artifactId>lombok</artifactId>
 
-							<groupId>org.projectlombok</groupId>
+                        </path>
 
-							<artifactId>lombok</artifactId>
+                    </annotationProcessorPaths>
 
-						</path>
+                </configuration>
 
-					</annotationProcessorPaths>
+            </plugin>
 
-				</configuration>
+            <plugin>
 
-			</plugin>
+                <groupId>org.springframework.boot</groupId>
 
-			<plugin>
+                <artifactId>spring-boot-maven-plugin</artifactId>
 
-				<groupId>org.springframework.boot</groupId>
+                <configuration>
 
-				<artifactId>spring-boot-maven-plugin</artifactId>
+                    <excludes>
 
-				<configuration>
+                        <exclude>
 
-					<excludes>
+                            <groupId>org.projectlombok</groupId>
 
-						<exclude>
+                            <artifactId>lombok</artifactId>
 
-							<groupId>org.projectlombok</groupId>
+                        </exclude>
 
-							<artifactId>lombok</artifactId>
+                    </excludes>
 
-						</exclude>
+                </configuration>
 
-					</excludes>
+            </plugin>
 
-				</configuration>
+        </plugins>
 
-			</plugin>
-
-		</plugins>
-
-	</build>
-
+    </build>
 
 
 </project>
