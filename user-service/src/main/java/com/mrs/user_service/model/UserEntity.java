@@ -1,13 +1,22 @@
 package com.mrs.user_service.model;
 
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
+import java.time.Instant;
 import java.util.UUID;
 
 @Entity
 @Table(name = "tb_users")
 @Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class UserEntity {
 
     @Id
@@ -20,13 +29,21 @@ public class UserEntity {
 
     private String password;
 
-    public UserEntity() {
-    }
+    private String fullName;
 
-    public UserEntity(String name, String email, String password) {
-        this.name = name;
-        this.email = email;
-        this.password = password;
-    }
+    @Builder.Default
+    private boolean active = true;
+
+    @Version
+    private Long version;
+
+    @CreationTimestamp
+    @Column(updatable = false)
+    private Instant createAt;
+
+    @UpdateTimestamp
+    private Instant updateAt;
+
+    private Instant deletedAt;
 
 }
