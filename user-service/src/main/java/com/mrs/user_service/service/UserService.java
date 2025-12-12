@@ -14,12 +14,13 @@ public class UserService {
         this.createUserHandler = createUserHandler;
     }
 
-    public void create(CreateUserRequest createUserRequest){
-        UserEntity user = new UserEntity(
-                createUserRequest.name(),
-                createUserRequest.email(),
-                createUserRequest.password()
-        );
+    public void create(CreateUserRequest createUserRequest) {
+        UserEntity user = UserEntity.builder()
+                .name(createUserRequest.name())
+                .email(createUserRequest.email())
+                .password(createUserRequest.password())
+                .fullName(createUserRequest.fullname())
+                .build();
 
         createUserHandler.handler(user);
     }
