@@ -18,6 +18,10 @@ public class CreateUserHandler {
     public void handler(UserEntity user){
         if(user == null) throw new IllegalArgumentException("User can't be null");
 
+        if(userRepository.existsByEmail(user.getEmail())){
+            throw new IllegalArgumentException("User's email already in use");
+        }
+
         userRepository.save(user);
     }
 
