@@ -1,6 +1,7 @@
 package com.mrs.user_service.handler;
 
 import com.mrs.user_service.repository.UserRepository;
+import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Component;
 
 import java.util.UUID;
@@ -14,6 +15,7 @@ public class DeleteUserHandler {
         this.userRepository = userRepository;
     }
 
+    @Transactional
     public void handler(UUID userId){
         if(!userRepository.existsById(userId)) {
             throw new IllegalArgumentException("User not exist");
