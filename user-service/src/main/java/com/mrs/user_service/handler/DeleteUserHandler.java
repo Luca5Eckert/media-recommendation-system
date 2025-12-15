@@ -1,7 +1,7 @@
 package com.mrs.user_service.handler;
 
 import com.mrs.user_service.repository.UserRepository;
-import jakarta.transaction.Transactional;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.stereotype.Component;
 
 import java.util.UUID;
