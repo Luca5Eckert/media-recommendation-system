@@ -11,11 +11,12 @@ public class CreateMediaHandler {
 
     private final MediaRepository mediaRepository;
 
-    private final KafkaTemplete<String, CreateMediaEvent> kafka;
+    private final  KafkaTemplate<String, CreateMediaEvent> kafka;
 
 
-    public CreateMediaHandler(MediaRepository mediaRepository) {
+    public CreateMediaHandler(MediaRepository mediaRepository, KafkaTemplate<String, CreateMediaEvent> kafka) {
         this.mediaRepository = mediaRepository;
+        this.kafka = kafka;
     }
 
     public void handler(Media media){
@@ -23,12 +24,12 @@ public class CreateMediaHandler {
 
         mediaRepository.save(media);
 
-        CreateMediaEvent createMediaEvent = new CreateMediaHandler(
+        CreateMediaEvent createMediaEvent = new CreateMediaEvent(
                 media.getId(),
                 media.getGenres()
         );
 
-        kafka.send("create-media", createMediaEvent.mediaId(), createMediaEvent);
+        kafka.send("create-media", createMediaEvent.mediaId().toString(), createMediaEvent);
     }
 
 }
