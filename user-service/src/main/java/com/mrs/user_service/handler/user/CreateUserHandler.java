@@ -1,4 +1,4 @@
-package com.mrs.user_service.handler;
+package com.mrs.user_service.handler.user;
 
 import com.mrs.user_service.model.UserEntity;
 import com.mrs.user_service.repository.UserRepository;

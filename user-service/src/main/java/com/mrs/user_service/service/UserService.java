@@ -4,7 +4,7 @@ import com.mrs.user_service.dto.CreateUserRequest;
 import com.mrs.user_service.dto.PageUser;
 import com.mrs.user_service.dto.UpdateUserRequest;
 import com.mrs.user_service.dto.UserGetResponse;
-import com.mrs.user_service.handler.*;
+import com.mrs.user_service.handler.user.*;
 import com.mrs.user_service.mapper.UserMapper;
 import com.mrs.user_service.model.UserEntity;
 import org.springframework.data.domain.Page;

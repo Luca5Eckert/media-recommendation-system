@@ -1,4 +1,4 @@
-package com.mrs.user_service.handler;
+package com.mrs.user_service.handler.user;
 
 import com.mrs.user_service.dto.UpdateUserRequest;
 import com.mrs.user_service.model.UserEntity;
