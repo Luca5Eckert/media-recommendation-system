@@ -16,7 +16,7 @@ public class GetAllUserHandler {
         this.userRepository = userRepository;
     }
 
-    public Page<UserEntity> handler(
+    public Page<UserEntity> execute(
             PageUser pageUser
     ) {
 

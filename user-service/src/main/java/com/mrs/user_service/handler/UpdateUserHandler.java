@@ -18,7 +18,7 @@ public class UpdateUserHandler {
         this.userRepository = userRepository;
     }
 
-    @Transactional
+    @Transactional(readOnly = true)
     public void execute(UUID userId, UpdateUserRequest request) {
         UserEntity user = userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("User not found by id: " + userId));

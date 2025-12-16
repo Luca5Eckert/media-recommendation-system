@@ -15,7 +15,7 @@ public class CreateUserHandler {
     }
 
     @Transactional
-    public void handler(UserEntity user){
+    public void execute(UserEntity user){
         if(user == null) throw new IllegalArgumentException("User can't be null");
 
         if(userRepository.existsByEmail(user.getEmail())){

@@ -17,7 +17,7 @@ public class GetUserHandler {
     }
 
     @Transactional(readOnly = true)
-    public UserEntity handler(UUID userId){
+    public UserEntity execute(UUID userId){
         return userRepository.findById(userId)
                 .orElseThrow( () -> new IllegalArgumentException("User not found by id"));
     }

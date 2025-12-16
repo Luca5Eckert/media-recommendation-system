@@ -16,7 +16,7 @@ public class DeleteUserHandler {
     }
 
     @Transactional
-    public void handler(UUID userId){
+    public void execute(UUID userId){
         if(!userRepository.existsById(userId)) {
             throw new IllegalArgumentException("User not exist");
         }
