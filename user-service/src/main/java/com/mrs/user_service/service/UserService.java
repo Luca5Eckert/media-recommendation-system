@@ -38,6 +38,7 @@ public class UserService {
                 .name(createUserRequest.name())
                 .email(createUserRequest.email())
                 .password(createUserRequest.password())
+                .role(createUserRequest.role())
                 .build();
 
         createUserHandler.execute(user);
