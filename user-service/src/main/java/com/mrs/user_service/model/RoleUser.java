@@ -4,8 +4,8 @@ import org.jspecify.annotations.Nullable;
 import org.springframework.security.core.GrantedAuthority;
 
 public enum RoleUser implements GrantedAuthority {
-    ADMIN("ROLE_ADMIN"),
-    USER("ROLE_USER");
+    ADMIN("ADMIN"),
+    USER("USER");
 
     private final String authority;
 
@@ -13,9 +13,8 @@ public enum RoleUser implements GrantedAuthority {
         this.authority = authority;
     }
 
-
     @Override
-    public @Nullable String getAuthority() {
+    public String getAuthority() {
         return authority;
     }
 }
