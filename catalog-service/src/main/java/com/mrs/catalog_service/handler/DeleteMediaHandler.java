@@ -1,5 +1,6 @@
 package com.mrs.catalog_service.handler;
 
+import com.mrs.catalog_service.event.DeleteMediaEvent;
 import com.mrs.catalog_service.repository.MediaRepository;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Component;
@@ -11,9 +12,9 @@ import java.util.UUID;
 public class DeleteMediaHandler {
 
     private final MediaRepository mediaRepository;
-    private final KafkaTemplate<String, UUID> kafka;
+    private final KafkaTemplate<String, DeleteMediaEvent> kafka;
 
-    public DeleteMediaHandler(MediaRepository mediaRepository, KafkaTemplate<String, UUID> kafka) {
+    public DeleteMediaHandler(MediaRepository mediaRepository, KafkaTemplate<String, DeleteMediaEvent> kafka) {
         this.mediaRepository = mediaRepository;
         this.kafka = kafka;
     }
@@ -24,7 +25,9 @@ public class DeleteMediaHandler {
 
         mediaRepository.deleteById(mediaId);
 
-        kafka.send("delete_media", mediaId.toString(), mediaId);
+        DeleteMediaEvent deleteMediaEvent = new DeleteMediaEvent(mediaId);
+
+        kafka.send("delete_media", mediaId.toString(), deleteMediaEvent);
     }
 
 
