@@ -1,6 +1,4 @@
-package com.mrs.catalog_service.event;
-
-import com.mrs.catalog_service.model.Genre;
+package com.mrs.recommendation_service.event;
 
 import java.util.List;
 import java.util.UUID;
