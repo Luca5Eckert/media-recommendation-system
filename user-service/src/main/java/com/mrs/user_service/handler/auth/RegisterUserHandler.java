@@ -6,7 +6,10 @@ import org.passay.PasswordData;
 import org.passay.PasswordValidator;
 import org.passay.RuleResult;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+@Service
 public class RegisterUserHandler {
 
     private final UserRepository userRepository;
@@ -19,38 +22,33 @@ public class RegisterUserHandler {
         this.passwordValidator = passwordValidator;
     }
 
+    @Transactional
+    public void register(UserEntity userEntity) {
+        if (userEntity == null) throw new IllegalArgumentException("User can't be null");
 
-    public void register(UserEntity userEntity){
-        if(userEntity == null) throw new IllegalArgumentException("User can't be null");
-
-        if(userRepository.existsByEmail(userEntity.getEmail())) {
+        if (userRepository.existsByEmail(userEntity.getEmail())) {
             throw new IllegalArgumentException("Email already in use");
         }
 
-        String password = userEntity.getPassword();
+        String rawPassword = userEntity.getPassword();
 
-        if(isValidPassword(password)){
-            throw new IllegalArgumentException("Password is not valid");
-        }
+        validatePassword(rawPassword);
 
-        userEntity.setPassword(passwordEncoder.encode(password));
+        userEntity.setPassword(passwordEncoder.encode(rawPassword));
 
         userRepository.save(userEntity);
     }
 
-    private boolean isValidPassword(String password) {
-        RuleResult ruleResult = passwordValidator.validate(new PasswordData(password));
+    private void validatePassword(String password) {
+        RuleResult result = passwordValidator.validate(new PasswordData(password));
 
-        return ruleResult.isValid();
+        if (!result.isValid()) {
+            String messages = passwordValidator.getMessages(result).stream()
+                    .reduce((m1, m2) -> m1 + ", " + m2)
+                    .orElse("Invalid password");
+
+            throw new IllegalArgumentException("Password invalid: " + messages);
+        }
     }
 
-    /*
-    UserEntity userEntity = UserEntity.builder()
-                .name(registerUserRequest.name())
-                .email(registerUserRequest.email())
-                .password(registerUserRequest.password())
-                .role(RoleUser.USER)
-                .build();
-             USAR NO SERVICE
-     */
 }
