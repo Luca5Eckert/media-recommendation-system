@@ -6,7 +6,9 @@ import com.mrs.user_service.handler.auth.LoginUserHandler;
 import com.mrs.user_service.handler.auth.RegisterUserHandler;
 import com.mrs.user_service.model.RoleUser;
 import com.mrs.user_service.model.UserEntity;
+import org.springframework.stereotype.Service;
 
+@Service
 public class AuthService {
 
     private final LoginUserHandler loginUserHandler;
