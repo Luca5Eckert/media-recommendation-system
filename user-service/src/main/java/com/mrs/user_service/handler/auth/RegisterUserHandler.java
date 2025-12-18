@@ -1,22 +1,22 @@
 package com.mrs.user_service.handler.auth;
 
-import com.mrs.user_service.dto.RegisterUserRequest;
-import com.mrs.user_service.model.RoleUser;
 import com.mrs.user_service.model.UserEntity;
 import com.mrs.user_service.repository.UserRepository;
-import com.mrs.user_service.validator.password.PasswordValidatorAdapter;
+import org.passay.PasswordData;
+import org.passay.PasswordValidator;
+import org.passay.RuleResult;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 public class RegisterUserHandler {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
-    private final PasswordValidatorAdapter passwordValidatorAdapter;
+    private final PasswordValidator passwordValidator;
 
-    public RegisterUserHandler(UserRepository userRepository, PasswordEncoder passwordEncoder, PasswordValidatorAdapter passwordValidatorAdapter) {
+    public RegisterUserHandler(UserRepository userRepository, PasswordEncoder passwordEncoder, PasswordValidator passwordValidator) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
-        this.passwordValidatorAdapter = passwordValidatorAdapter;
+        this.passwordValidator = passwordValidator;
     }
 
 
@@ -27,10 +27,21 @@ public class RegisterUserHandler {
             throw new IllegalArgumentException("Email already in use");
         }
 
-        String passwordEncoded = passwordEncoder.encode(userEntity.getPassword());
-        userEntity.setPassword(passwordEncoded);
+        String password = userEntity.getPassword();
+
+        if(isValidPassword(password)){
+            throw new IllegalArgumentException("Password is not valid");
+        }
+
+        userEntity.setPassword(passwordEncoder.encode(password));
 
         userRepository.save(userEntity);
+    }
+
+    private boolean isValidPassword(String password) {
+        RuleResult ruleResult = passwordValidator.validate(new PasswordData(password));
+
+        return ruleResult.isValid();
     }
 
     /*
