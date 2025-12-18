@@ -1,7 +1,11 @@
 package com.mrs.catalog_service.repository;
 
 import com.mrs.catalog_service.model.Media;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
 
-public interface MediaRepository {
-    void save(Media media);
+import java.util.UUID;
+
+@Repository
+public interface MediaRepository extends JpaRepository<Media, UUID> {
 }
