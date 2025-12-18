@@ -7,6 +7,7 @@ import com.mrs.user_service.service.UserService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -23,6 +24,7 @@ public class UserController {
     }
 
     @PostMapping
+    @PreAuthorize("ADMIN")
     public ResponseEntity<Void> create(@RequestBody @Valid CreateUserRequest createUserRequest) {
         userService.create(createUserRequest);
         return ResponseEntity.status(HttpStatus.CREATED).build();
@@ -43,6 +45,7 @@ public class UserController {
     }
 
     @PutMapping("/{id}")
+    @PreAuthorize("ADMIN")
     public ResponseEntity<Void> update(
             @PathVariable UUID id,
             @RequestBody @Valid UpdateUserRequest updateUserRequest) {
@@ -51,6 +54,7 @@ public class UserController {
     }
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("ADMIN")
     public ResponseEntity<Void> delete(@PathVariable UUID id) {
         userService.delete(id);
         return ResponseEntity.noContent().build();
