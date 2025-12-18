@@ -23,7 +23,7 @@ public class RegisterUserHandler {
     }
 
     @Transactional
-    public void register(UserEntity userEntity) {
+    public void execute(UserEntity userEntity) {
         if (userEntity == null) throw new IllegalArgumentException("User can't be null");
 
         if (userRepository.existsByEmail(userEntity.getEmail())) {
