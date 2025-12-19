@@ -1,68 +1,71 @@
 package com.mrs.recommendation_service.model;
 
-import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Data;
+import com.mrs.recommendation_service.event.InteractionEvent;
+import jakarta.persistence.*; // Ou javax.persistence dependendo da versão do Spring Boot
+import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.hibernate.annotations.JdbcTypeCode;
-import org.hibernate.type.SqlTypes;
+import lombok.Setter;
 
-import java.time. Instant;
+import java.time.Instant;
 import java.util.*;
 
 @Entity
-@Table(name = "user_profiles")
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
-@AllArgsConstructor
 public class UserProfile {
 
     @Id
     private UUID userId;
 
-    /**
-     * Scores por gênero acumulados das interações
-     * Exemplo: {"Terror": 5. 0, "Suspense": 3.0, "Comédia": -1.0}
-     */
-    @JdbcTypeCode(SqlTypes. JSON)
-    @Column(name = "genre_scores", columnDefinition = "jsonb")
+    @Version
+    private Long version;
+
+    @ElementCollection
     private Map<String, Double> genreScores = new HashMap<>();
 
-    /**
-     * IDs das mídias que o usuário já interagiu (evita recomendar novamente)
-     */
-    @JdbcTypeCode(SqlTypes. ARRAY)
-    @Column(name = "interacted_media_ids", columnDefinition = "uuid[]")
-    private List<UUID> interactedMediaIds = new ArrayList<>();
+    @ElementCollection
+    private Set<UUID> interactedMediaIds = new HashSet<>();
 
-    /**
-     * Score total de engajamento do usuário
-     */
-    @Column(name = "total_engagement_score")
-    private double totalEngagementScore = 0.0;
-
-    /**
-     * Contadores de interações por tipo
-     */
-    @Column(name = "total_likes")
-    private int totalLikes = 0;
-
-    @Column(name = "total_dislikes")
-    private int totalDislikes = 0;
-
-    @Column(name = "total_watches")
-    private int totalWatches = 0;
-
-    @Column(name = "last_updated", nullable = false)
+    private long totalLikes;
+    private long totalDislikes;
+    private long totalWatches;
+    private double totalEngagementScore;
     private Instant lastUpdated;
-
-    @Column(name = "created_at", nullable = false)
-    private Instant createdAt;
 
     public UserProfile(UUID userId) {
         this.userId = userId;
-        this.createdAt = Instant.now();
         this.lastUpdated = Instant.now();
     }
 
+    public void processInteraction(MediaFeature media, InteractionType type, double interactionValue) {
+        if (media.getGenres() != null) {
+            for (String genre : media.getGenres()) {
+                this.genreScores.merge(genre, type.getWeightInteraction(), Double::sum);
+            }
+        }
+
+        this.interactedMediaIds.add(media.getMediaId());
+
+        updateCounters(type);
+
+        updateEngagementScore(type, interactionValue);
+
+        this.lastUpdated = Instant.now();
+    }
+
+    private void updateCounters(InteractionType type) {
+        switch (type) {
+            case LIKE -> this.totalLikes++;
+            case DISLIKE -> this.totalDislikes++;
+            case WATCH -> this.totalWatches++;
+        }
+    }
+
+    private void updateEngagementScore(InteractionType type, double interactionValue) {
+        double weight = type.getWeightInteraction();
+
+        double scoreIncrement = weight * (1 + interactionValue);
+        this.totalEngagementScore += scoreIncrement;
+    }
 }
