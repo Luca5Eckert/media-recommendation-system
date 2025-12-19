@@ -6,20 +6,6 @@ The ML Service has been successfully implemented as a **hybrid microservice** th
 
 ## Architecture Decision Evolution
 
-### First Implementation (Incorrect)
-- ❌ ML service connected to 3 databases (user_db, catalog_db, engagement_db)
-- ❌ Violated database-per-service pattern
-- ❌ Created tight coupling
-
-### Second Implementation (Stateless - Too Pure)
-- ✅ Stateless design - no database connections
-- ✅ Followed database-per-service correctly
-- ❌ Required sending all media features in request body
-- ❌ Large payloads (potentially MBs for large catalogs)
-- ❌ Network bandwidth waste
-- ❌ Potential timeout issues
-
-### Final Implementation (Hybrid - Correct) ✅
 - ✅ **Small request payload** - only UserProfile (~1KB)
 - ✅ **Database access to recommendation_db** - single connection
 - ✅ **Follows database-per-service** - only accesses owned data
