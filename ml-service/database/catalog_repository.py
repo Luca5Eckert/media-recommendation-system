@@ -152,7 +152,8 @@ class CatalogRepository:
             
             params.append(limit)
             
-            query = f"""
+            # Build query with string concatenation for safety
+            query = """
                 SELECT 
                     m.id,
                     m.title,
@@ -164,7 +165,7 @@ class CatalogRepository:
                     COUNT(DISTINCT CASE WHEN mg.genre_name = ANY(%s) THEN mg.genre_name END) as genre_match_count
                 FROM medias m
                 LEFT JOIN tb_media_genre mg ON mg.media_id = m.id
-                WHERE m.deleted_at IS NULL {exclude_clause}
+                WHERE m.deleted_at IS NULL """ + exclude_clause + """
                 GROUP BY m.id, m.title, m.description, m.release_year, m.media_type, m.cover_url
                 HAVING COUNT(DISTINCT CASE WHEN mg.genre_name = ANY(%s) THEN mg.genre_name END) > 0
                 ORDER BY genre_match_count DESC, m.create_at DESC

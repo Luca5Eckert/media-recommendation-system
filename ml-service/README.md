@@ -179,8 +179,9 @@ gunicorn --bind 0.0.0.0:5000 --workers 4 --threads 2 app:app
 - psycopg2-binary 2.9.9 - PostgreSQL adapter
 - python-dotenv 1.0.0 - Environment variable management
 - gunicorn 21.2.0 - WSGI HTTP server
-- numpy 1.24.3 - Numerical computing
-- scikit-learn 1.3.2 - Machine learning library
+- numpy 1.26.4 - Numerical computing
+- scikit-learn 1.4.2 - Machine learning library
+- requests 2.31.0 - HTTP library
 
 ## Algorithm Details
 
