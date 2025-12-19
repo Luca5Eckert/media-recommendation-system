@@ -54,9 +54,31 @@ graph TB
 - 📚 **Catalog Service** → `catalog_db`: Maintains the catalog of movies, series, and metadata
 - 💡 **Engagement Service** → `engagement_db`: Tracks user interactions (views, likes, clicks, ratings) and publishes events to Kafka
 - 🎯 **Recommendation Service** ← Kafka → `recommendation_db`: Consumes engagement events and generates personalized recommendations
+- 🤖 **ML Service** (Python): Provides intelligent recommendations using hybrid algorithm (collaborative + content-based filtering)
 - 📨 **Apache Kafka**: Acts as the central event bus for asynchronous communication between services
 
 > **📝 Local Development Note**: For simplified local development with Docker Compose, all four databases (`user_db`, `catalog_db`, `engagement_db`, `recommendation_db`) are hosted within a single PostgreSQL 15 container. This approach maintains logical database separation while reducing infrastructure complexity in the development environment. In production, each database would be deployed as an independent instance to ensure complete service isolation.
+
+## 🤖 ML Service - Personalized Recommendations
+
+The **ML Service** is a Python-based microservice that delivers personalized media recommendations using a sophisticated hybrid algorithm:
+
+### Algorithm Features
+- **Content-Based Filtering (40%)**: Matches media to user's genre preferences
+- **Collaborative Filtering (60%)**: Recommends based on similar users' behavior
+- **Performance Optimized**: Connection pooling, batch queries, avoiding N+1 problems
+- **Scalable**: Horizontally scalable with Gunicorn multi-worker support
+
+### Quick Start
+```bash
+# Get recommendations for a user
+curl "http://localhost:5000/api/recommendations/USER_UUID?limit=10"
+
+# Check service health
+curl http://localhost:5000/health
+```
+
+📖 **Full Documentation**: See [ML Service Integration Guide](ml-service/INTEGRATION_GUIDE.md)
 
 ## 📦 Technology Stack
 
@@ -67,6 +89,7 @@ graph TB
 | **Message Broker** | Apache Kafka | 7.3.0 (Confluent) |
 | **Coordination** | Apache Zookeeper | 7.3.0 (Confluent) |
 | **Backend Services** | Spring Boot (Java) | 4.0.0 |
+| **ML Service** | Python + Flask | 3.11+ / 3.0.0 |
 | **JDK** | Java | 21 |
 
 ## 🗄️ Database Architecture
@@ -200,6 +223,11 @@ docker exec -it kafka kafka-topics --create --topic engagement-events --bootstra
 | PostgreSQL | `5432` | `localhost:5432` |
 | Apache Kafka | `9092` | `localhost:9092` |
 | Zookeeper | `2181` | `localhost:2181` |
+| User Service | `8084` | `http://localhost:8084` |
+| Catalog Service | `8081` | `http://localhost:8081` |
+| Engagement Service | `8083` | `http://localhost:8083` |
+| Recommendation Service | `8085` | `http://localhost:8085` |
+| **ML Service** | `5000` | `http://localhost:5000` |
 
 ### Database Connection Details
 
@@ -220,7 +248,8 @@ Databases: user_db, catalog_db, engagement_db, recommendation_db
 - [x] PostgreSQL setup with multi-database architecture
 - [x] Apache Kafka and Zookeeper integration
 - [x] Database auto-initialization scripts
-- [x] Microservices project structure (catalog-service, engagement-service)
+- [x] Microservices project structure (catalog-service, engagement-service, user-service)
+- [x] **ML Service with hybrid recommendation algorithm (Python/Flask)**
 
 ### 🛣️ Roadmap / Next Steps
 
@@ -231,7 +260,7 @@ Databases: user_db, catalog_db, engagement_db, recommendation_db
    - [ ] Implement Recommendation Engine (Kafka consumer + ML algorithms)
 
 2. **API Layer**
-   - [ ] RESTful APIs for each service
+   - [x] RESTful API for ML recommendations
    - [ ] API Gateway for unified access
    - [ ] OpenAPI/Swagger documentation
 
@@ -241,10 +270,11 @@ Databases: user_db, catalog_db, engagement_db, recommendation_db
    - [ ] Event sourcing patterns
 
 4. **Machine Learning**
-   - [ ] Collaborative filtering algorithms
-   - [ ] Content-based filtering
-   - [ ] Hybrid recommendation strategies
+   - [x] Collaborative filtering algorithms
+   - [x] Content-based filtering
+   - [x] Hybrid recommendation strategies
    - [ ] Model training pipeline
+   - [ ] Real-time learning from user feedback
 
 5. **Frontend**
    - [ ] Web application (React/Vue/Angular)
