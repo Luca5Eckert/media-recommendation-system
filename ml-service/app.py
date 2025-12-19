@@ -21,6 +21,9 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
+# Configuration constants
+MAX_RECOMMENDATIONS_LIMIT = int(os.getenv('MAX_RECOMMENDATIONS_LIMIT', '100'))
+
 # Initialize Flask app
 app = Flask(__name__)
 CORS(app)
@@ -94,9 +97,9 @@ def calculate_recommendations():
         limit = data.get('limit', 10)
         
         # Validate limit
-        if not isinstance(limit, int) or limit < 1 or limit > 100:
+        if not isinstance(limit, int) or limit < 1 or limit > MAX_RECOMMENDATIONS_LIMIT:
             return jsonify({
-                'error': 'limit must be an integer between 1 and 100'
+                'error': f'limit must be an integer between 1 and {MAX_RECOMMENDATIONS_LIMIT}'
             }), 400
         
         # Calculate recommendations

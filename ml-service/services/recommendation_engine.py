@@ -8,6 +8,11 @@ from typing import List, Dict, Any
 
 logger = logging.getLogger(__name__)
 
+# Configuration constants
+DEFAULT_CONTENT_WEIGHT = 0.7
+DEFAULT_POPULARITY_WEIGHT = 0.3
+MAX_GENRE_SCORE = 10.0  # Expected range: 0-10 for genre scores
+
 
 class RecommendationEngine:
     """
@@ -20,14 +25,22 @@ class RecommendationEngine:
     3. Diversity: Ensures variety in recommendations
     """
     
-    def __init__(self, content_weight=0.7, popularity_weight=0.3):
+    def __init__(self, content_weight=DEFAULT_CONTENT_WEIGHT, popularity_weight=DEFAULT_POPULARITY_WEIGHT):
         """
         Initialize recommendation engine with algorithm weights
         
         Args:
             content_weight: Weight for content-based scoring (0-1)
             popularity_weight: Weight for popularity scoring (0-1)
+        
+        Raises:
+            ValueError: If weights don't sum to 1.0
         """
+        # Validate weights sum to 1.0
+        total_weight = content_weight + popularity_weight
+        if abs(total_weight - 1.0) > 0.001:  # Allow small floating point errors
+            raise ValueError(f"Weights must sum to 1.0, got {total_weight}")
+        
         self.content_weight = content_weight
         self.popularity_weight = popularity_weight
         logger.info(f"RecommendationEngine initialized (content: {content_weight}, popularity: {popularity_weight})")
@@ -150,8 +163,8 @@ class RecommendationEngine:
         # Average of matching genre scores
         avg_score = sum(matching_scores) / len(matching_scores)
         
-        # Normalize to 0-1 range (assuming genre scores can be 0-10)
-        normalized_score = min(avg_score / 10.0, 1.0)
+        # Normalize to 0-1 range (genre scores are expected to be 0-10)
+        normalized_score = min(avg_score / MAX_GENRE_SCORE, 1.0)
         
         # Boost for multiple genre matches
         match_ratio = len(matching_scores) / len(media_genres)
