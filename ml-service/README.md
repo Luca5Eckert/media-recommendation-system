@@ -2,48 +2,48 @@
 
 ## Overview
 
-The ML Service is a **stateless Python microservice** that calculates personalized media recommendations. It receives user profile data and available media via REST API, applies a hybrid recommendation algorithm, and returns scored recommendations.
+The ML Service is a **Python microservice** that calculates personalized media recommendations. It receives user profile data via REST API and fetches media features from the **recommendation_db** database.
 
 ## Architecture
 
-### Stateless Design
-- **No database connections** - follows database-per-service pattern
-- Receives all data via API requests
-- Pure computation service focused on recommendation algorithms
-- Can be horizontally scaled without coordination
+### Hybrid Design
+- **Receives UserProfile via API** - avoids large payloads in request body
+- **Fetches MediaFeatures from recommendation_db** - single database connection
+- **Calculates and returns recommendations** - hybrid algorithm with scoring
+- **Follows database-per-service** - only accesses recommendation_db
 
 ### Integration Flow
 
 ```
 recommendation-service (Java)
     ↓
-    1. Fetches UserProfile from recommendation_db
-    2. Fetches MediaFeatures from recommendation_db  
-    3. Calls ML Service API with data
+    1. Calls ML Service API with UserProfile only
     ↓
 ml-service (Python)
     ↓
-    Calculates recommendations (stateless)
-    ↓
-    Returns scored media list
+    2. Fetches MediaFeatures from recommendation_db
+    3. Calculates recommendations (content-based + popularity)
+    4. Returns scored media list
     ↓
 recommendation-service
-    Stores/returns recommendations
+    5. Stores/returns recommendations
 ```
 
 ## Features
 
-- **Stateless Architecture**: No database dependencies, pure computation
-- **Hybrid Algorithm**: Content-based filtering with popularity boost
-- **Performance**: <50ms processing time per request
-- **Scalable**: Horizontally scalable, stateless design
+- **Efficient API Design**: Small request payload (only UserProfile)
+- **Database Access**: Direct access to recommendation_db for MediaFeatures
+- **Hybrid Algorithm**: Content-based filtering (70%) + popularity boost (30%)
+- **Performance**: <100ms processing time per request
+- **Scalable**: Horizontally scalable with connection pooling
 - **Production Ready**: Docker, Gunicorn, health checks
 
 ## API Endpoint
 
 ### POST /api/recommendations
 
-Calculate personalized recommendations based on user profile and available media.
+Calculate personalized recommendations based on user profile.
+ML service fetches media features from database.
 
 **Request Body:**
 ```json
@@ -58,18 +58,6 @@ Calculate personalized recommendations based on user profile and available media
     "interacted_media_ids": ["uuid1", "uuid2"],
     "total_engagement_score": 100.0
   },
-  "available_media": [
-    {
-      "media_id": "uuid",
-      "genres": ["ACTION", "THRILLER"],
-      "popularity_score": 0.8,
-      "title": "Inception",
-      "description": "A mind-bending thriller...",
-      "release_year": 2010,
-      "media_type": "MOVIE",
-      "cover_url": "https://..."
-    }
-  ],
   "limit": 10
 }
 ```
@@ -81,15 +69,10 @@ Calculate personalized recommendations based on user profile and available media
   "recommendations": [
     {
       "media_id": "uuid",
-      "title": "Inception",
       "genres": ["ACTION", "THRILLER"],
       "popularity_score": 0.8,
-      "release_year": 2010,
-      "media_type": "MOVIE",
-      "cover_url": "https://...",
       "recommendation_score": 0.8745,
-      "content_score": 0.8500,
-      "popularity_score": 0.8000
+      "content_score": 0.8500
     }
   ],
   "count": 10
@@ -135,6 +118,18 @@ for each media:
 recommendation_score = (content_score × 0.7) + (popularity_score × 0.3)
 ```
 
+## Database Schema
+
+The ML service accesses the `medias_features` table in recommendation_db:
+
+```sql
+CREATE TABLE medias_features (
+    media_id UUID PRIMARY KEY,
+    genres TEXT[],
+    popularity_score DOUBLE PRECISION
+);
+```
+
 ## Running the Service
 
 ### Development
@@ -142,6 +137,14 @@ recommendation_score = (content_score × 0.7) + (popularity_score × 0.3)
 ```bash
 cd ml-service
 pip install -r requirements.txt
+
+# Set environment variables
+export DB_HOST=localhost
+export DB_PORT=5432
+export DB_NAME=recommendation_db
+export DB_USER=user
+export DB_PASSWORD=password
+
 python app.py
 ```
 
@@ -163,16 +166,9 @@ curl -X POST http://localhost:5000/api/recommendations \
   -d '{
     "user_profile": {
       "user_id": "123e4567-e89b-12d3-a456-426614174000",
-      "genre_scores": {"ACTION": 5.0, "THRILLER": 3.0}
+      "genre_scores": {"ACTION": 5.0, "THRILLER": 3.0},
+      "interacted_media_ids": []
     },
-    "available_media": [
-      {
-        "media_id": "uuid",
-        "genres": ["ACTION"],
-        "popularity_score": 0.8,
-        "title": "Action Movie"
-      }
-    ],
     "limit": 10
   }'
 ```
@@ -181,6 +177,7 @@ curl -X POST http://localhost:5000/api/recommendations \
 
 - Flask 3.0.0 - Web framework
 - Flask-CORS 4.0.0 - CORS support
+- psycopg2-binary 2.9.9 - PostgreSQL adapter
 - python-dotenv 1.0.0 - Environment variables
 - gunicorn 21.2.0 - WSGI server
 - requests 2.31.0 - HTTP library (for health checks)
@@ -188,17 +185,27 @@ curl -X POST http://localhost:5000/api/recommendations \
 ## Environment Variables
 
 ```env
+# Database (only recommendation_db)
+DB_HOST=localhost
+DB_PORT=5432
+DB_NAME=recommendation_db
+DB_USER=user
+DB_PASSWORD=password
+
+# Service
 PORT=5000
 DEBUG=False
+MAX_RECOMMENDATIONS_LIMIT=100
 LOG_LEVEL=INFO
 ```
 
 ## Performance Characteristics
 
-- **Processing Time**: <50ms per request
+- **Processing Time**: <100ms per request (including DB query)
 - **Concurrent Workers**: 4 workers × 2 threads = 8
-- **Stateless**: No shared state, perfect for horizontal scaling
-- **Memory**: Low memory footprint (~100MB per worker)
+- **Database**: Connection pool (2-10 connections)
+- **Memory**: ~150MB per worker
+- **Scalability**: Horizontal scaling with shared database
 
 ## Integration Example (Java)
 
@@ -206,13 +213,12 @@ LOG_LEVEL=INFO
 // From recommendation-service
 RestTemplate restTemplate = new RestTemplate();
 
-// Prepare request
+// Prepare request (only UserProfile, no media list)
 RecommendationRequest request = new RecommendationRequest();
 request.setUserProfile(userProfile);
-request.setAvailableMedia(mediaFeatures);
 request.setLimit(10);
 
-// Call ML service
+// Call ML service - it will fetch media from DB
 ResponseEntity<RecommendationResponse> response = restTemplate.postForEntity(
     "http://ml-service:5000/api/recommendations",
     request,
@@ -224,29 +230,36 @@ List<ScoredMedia> recommendations = response.getBody().getRecommendations();
 
 ## Design Decisions
 
-### Why Stateless?
+### Why Database Access?
 
-1. **Database per Service**: Follows microservices best practices
-2. **Scalability**: Can scale horizontally without coordination
-3. **Simplicity**: No database connection management
-4. **Performance**: Pure computation without I/O overhead
-5. **Testing**: Easy to test with different inputs
+**Problem with pure stateless:** Sending thousands of media features in request body creates:
+- Large network payloads (MBs of data)
+- Slow request/response times
+- Network bandwidth waste
+- Potential timeout issues
 
-### Why Simple Algorithm?
+**Solution with DB access:**
+- ✅ Small request payload (only UserProfile ~1KB)
+- ✅ Fast network transfer
+- ✅ ML service fetches only needed data from DB
+- ✅ Still follows database-per-service (only recommendation_db)
+- ✅ Scalable with connection pooling
 
-For MVP, we prioritize:
-- **Fast implementation** and deployment
-- **Explainable** recommendations
-- **Good enough** accuracy for initial users
-- Foundation for **future ML models**
+### Why recommendation_db?
 
-### Future Enhancements
+The `medias_features` table in recommendation_db is a **materialized view** that:
+- Contains denormalized media data for recommendation purposes
+- Is owned by recommendation-service domain
+- Is updated when media catalog changes
+- Optimized for ML service queries
 
-1. **Advanced ML Models**: Train models on historical data
-2. **Collaborative Filtering**: Use user similarity
-3. **Real-time Learning**: Update based on feedback
-4. **A/B Testing**: Compare algorithm variations
-5. **Caching**: Add Redis for frequently requested users
+## Future Enhancements
+
+1. **Caching**: Add Redis for frequently requested users
+2. **Advanced ML**: Train collaborative filtering models
+3. **Real-time Updates**: Stream media feature updates
+4. **A/B Testing**: Test different algorithm weights
+5. **Batch Processing**: Pre-compute recommendations for popular profiles
 
 ## License
 
