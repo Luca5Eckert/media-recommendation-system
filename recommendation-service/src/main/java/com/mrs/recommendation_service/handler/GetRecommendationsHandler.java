@@ -1,12 +1,11 @@
 package com.mrs.recommendation_service.handler;
 
 import com.mrs.recommendation_service.dto.GetRecommendationRequest;
-import com.mrs.recommendation_service.dto.RecommendationResponse;
+import com.mrs.recommendation_service.dto.RecommendationMlResponse;
 import com.mrs.recommendation_service.model.Recommendation;
 import com.mrs.recommendation_service.model.UserProfile;
 import com.mrs.recommendation_service.repository.UserProfileRepository;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
 
@@ -36,15 +35,15 @@ public class GetRecommendationsHandler {
                 .limit(10)
                 .build();
 
-        RecommendationResponse recommendationResponse = restClient.post()
+        RecommendationMlResponse recommendationMlResponse = restClient.post()
                 .uri(mlServiceUrl + "/api/recommendations")
                 .body(request)
                 .retrieve()
-                .body(RecommendationResponse.class);
+                .body(RecommendationMlResponse.class);
 
-        assert recommendationResponse != null;
+        assert recommendationMlResponse != null;
 
-        return recommendationResponse.recommendations();
+        return recommendationMlResponse.recommendations();
     }
 
 }
