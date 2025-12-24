@@ -1,13 +1,10 @@
 package com.mrs.user_service.handler.user_preference;
 
-import com.mrs.user_service.dto.CreateUserPrefenceRequest;
 import com.mrs.user_service.model.UserPreference;
 import com.mrs.user_service.repository.UserPreferenceRepository;
 import com.mrs.user_service.repository.UserRepository;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.UUID;
 
 @Component
 public class CreateUserPrefenceHandler {
