@@ -1,6 +1,7 @@
 package com.mrs.user_service.handler.auth;
 
 import com.mrs.user_service.security.token.TokenProvider;
+import com.mrs.user_service.security.user.UserDetailImpl;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -23,10 +24,11 @@ public class LoginUserHandler {
                 new UsernamePasswordAuthenticationToken(email, password)
         );
 
-        UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+        UserDetailImpl userDetails = (UserDetailImpl) authentication.getPrincipal();
 
         return tokenProvider.createToken(
                 userDetails.getUsername(),
+                userDetails.getUserId(),
                 userDetails.getAuthorities()
         );
     }
