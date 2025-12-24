@@ -15,7 +15,7 @@ public class CreateMediaConsumerEvent {
         this.mediaFeatureRepository = mediaFeatureRepository;
     }
 
-    @KafkaListener(topics = "create_media")
+    @KafkaListener(topics = "create-media", groupId = "recommendation-service")
     public void listen(CreateMediaEvent createMediaEvent){
         MediaFeature mediaFeature = new MediaFeature(
                 createMediaEvent.mediaId(),

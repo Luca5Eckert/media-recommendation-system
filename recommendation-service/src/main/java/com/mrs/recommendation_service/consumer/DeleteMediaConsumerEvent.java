@@ -14,7 +14,7 @@ public class DeleteMediaConsumerEvent {
         this.mediaFeatureRepository = mediaFeatureRepository;
     }
 
-    @KafkaListener(topics = "delete_media")
+    @KafkaListener(topics = "delete-media", groupId = "recommendation-service")
     public void listen(DeleteMediaEvent deleteMediaEvent){
         mediaFeatureRepository.deleteById(deleteMediaEvent.mediaId());
     }

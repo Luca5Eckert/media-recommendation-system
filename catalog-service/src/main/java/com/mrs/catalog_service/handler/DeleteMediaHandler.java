@@ -27,7 +27,7 @@ public class DeleteMediaHandler {
 
         DeleteMediaEvent deleteMediaEvent = new DeleteMediaEvent(mediaId);
 
-        kafka.send("delete_media", mediaId.toString(), deleteMediaEvent);
+        kafka.send("delete-media", mediaId.toString(), deleteMediaEvent);
     }
 
 
