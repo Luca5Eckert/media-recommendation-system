@@ -22,8 +22,7 @@ public class InteractionConsumerEvent {
 
     @KafkaListener(
             topics = "engagement-created",
-            groupId = "recommendation-service",
-            containerFactory = "kafkaListenerContainerFactory"
+            groupId = "recommendation-service"
     )
     public void consume(
             @Payload InteractionEvent interactionEvent
