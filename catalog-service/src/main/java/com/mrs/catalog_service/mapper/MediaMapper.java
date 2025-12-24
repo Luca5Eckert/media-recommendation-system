@@ -2,8 +2,9 @@ package com.mrs.catalog_service.mapper;
 
 import com.mrs.catalog_service.dto.GetMediaResponse;
 import com.mrs.catalog_service.model.Media;
+import org.springframework.stereotype.Component;
 
-
+@Component
 public class MediaMapper {
 
     public GetMediaResponse toGetResponse(Media media){
