@@ -35,7 +35,7 @@ class GetAllUserHandlerTest {
         // Arrange
         int page = 2;
         int size = 10;
-        PageUser pageUser = new PageUser(page, size);
+        PageUser pageUser = new PageUser(size, page);
 
         Page<UserEntity> expectedPage = new PageImpl<>(List.of(new UserEntity()));
         when(userRepository.findAll(any(PageRequest.class))).thenReturn(expectedPage);
