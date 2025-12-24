@@ -1,28 +1,30 @@
 package com.mrs.user_service.handler.user;
 
 import com.mrs.user_service.model.UserEntity;
-import com.mrs.user_service.repository.UserRepository;
-import org.springframework.transaction.annotation.Transactional;
+import com.mrs. user_service.repository.UserRepository;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 @Component
 public class CreateUserHandler {
 
     private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
 
-    public CreateUserHandler(UserRepository userRepository) {
+    public CreateUserHandler(UserRepository userRepository, PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
+        this. passwordEncoder = passwordEncoder;
     }
 
     @Transactional
-    public void execute(UserEntity user){
-        if(user == null) throw new IllegalArgumentException("User can't be null");
-
-        if(userRepository.existsByEmail(user.getEmail())){
-            throw new IllegalArgumentException("User's email already in use");
+    public void execute(UserEntity user) {
+        if (userRepository.existsByEmail(user.getEmail())) {
+            throw new IllegalArgumentException("Email already in use");
         }
+
+        user.setPassword(passwordEncoder.encode(user.getPassword()));
 
         userRepository.save(user);
     }
-
 }
