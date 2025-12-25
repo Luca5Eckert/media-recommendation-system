@@ -35,9 +35,9 @@ TESTS_SKIPPED=0
 USER_TOKEN=""
 ADMIN_TOKEN=""
 TEST_USER_ID=""
-TEST_USER_EMAIL="testuser_$(date +%s)@test.com"
+TEST_USER_EMAIL="testuser_$(date +%s)_$$_${RANDOM}@test.com"
 TEST_USER_PASSWORD="TestPassword123!"
-TEST_ADMIN_EMAIL="admin_$(date +%s)@test.com"
+TEST_ADMIN_EMAIL="admin_$(date +%s)_$$_${RANDOM}@test.com"
 CREATED_MEDIA_IDS=()
 
 # Logging functions
@@ -258,14 +258,16 @@ test_user_login() {
         log_error "User login failed: $response"
     fi
     
-    # Test invalid credentials
+    # Test invalid credentials (expects 401 Unauthorized or 403 Forbidden)
     local invalid_login_data='{"email":"nonexistent@test.com","password":"wrongpassword"}'
     local status
     status=$(get_status_code "POST" "$BASE_URL:$USER_SERVICE_PORT/auth/login" "$invalid_login_data")
-    if [[ "$status" == "401" || "$status" == "403" || "$status" == "500" ]]; then
+    if [[ "$status" == "401" || "$status" == "403" ]]; then
         log_success "Invalid credentials correctly rejected ($status)"
+    elif [[ "$status" == "500" ]]; then
+        log_warning "Invalid credentials returned 500 - authentication exception handling may need review"
     else
-        log_error "Invalid credentials should be rejected (got $status)"
+        log_error "Invalid credentials should be rejected with 401/403 (got $status)"
     fi
 }
 
@@ -306,12 +308,18 @@ test_engagement_operations() {
         return
     fi
     
+    # Generate unique UUIDs for testing - fallback to random if uuidgen not available
+    local test_user_uuid
+    local test_media_uuid
+    test_user_uuid=$(uuidgen 2>/dev/null || printf '%08x-%04x-%04x-%04x-%012x' $RANDOM $RANDOM $RANDOM $RANDOM $RANDOM$RANDOM)
+    test_media_uuid=$(uuidgen 2>/dev/null || printf '%08x-%04x-%04x-%04x-%012x' $RANDOM $RANDOM $RANDOM $RANDOM $RANDOM$RANDOM)
+    
     # Test creating an engagement
     local engagement_data
     engagement_data=$(cat <<EOF
 {
-    "userId": "$(uuidgen 2>/dev/null || echo '11111111-1111-1111-1111-111111111111')",
-    "mediaId": "$(uuidgen 2>/dev/null || echo '22222222-2222-2222-2222-222222222222')",
+    "userId": "$test_user_uuid",
+    "mediaId": "$test_media_uuid",
     "type": "LIKE",
     "interactionValue": 1.0
 }

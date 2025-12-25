@@ -27,7 +27,16 @@ jobs:
       - name: Run unit tests for ${{ matrix.service }}
         working-directory: ${{ matrix.service }}
         run: |
-          ./mvnw test -B -Dtest=*Test -DfailIfNoTests=false
+          ./mvnw test -B
+      
+      - name: Verify tests were executed
+        working-directory: ${{ matrix.service }}
+        run: |
+          if [ ! -d "target/surefire-reports" ] || [ -z "$(ls -A target/surefire-reports/*.xml 2>/dev/null)" ]; then
+            echo "Warning: No test reports found"
+          else
+            echo "Test reports found in target/surefire-reports"
+          fi
       
       - name: Upload test results
         if: always()

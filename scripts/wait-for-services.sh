@@ -33,7 +33,7 @@ wait_for_service() {
     log_info "Waiting for $service_name..."
     
     while [[ $attempt -le $MAX_RETRIES ]]; do
-        if curl -sf "$health_url" >/dev/null 2>&1; then
+        if curl -sf --connect-timeout 5 --max-time 10 "$health_url" >/dev/null 2>&1; then
             log_success "$service_name is ready!"
             return 0
         fi
