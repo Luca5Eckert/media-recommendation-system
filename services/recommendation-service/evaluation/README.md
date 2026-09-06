@@ -45,11 +45,14 @@ From the repository root:
 ```bash
 mvn -pl services/recommendation-service -am \
   -Dtest=RecommendationQualityEvaluationIT \
+  -Dsurefire.failIfNoSpecifiedTests=false \
   -Dgroups=evaluation \
   test
 ```
 
-A reference GitHub Actions run passes the commit SHA and output location explicitly. Results are written to:
+`failIfNoSpecifiedTests=false` is required because `-am` first builds `kafka-contracts`, which intentionally does not contain the evaluation test selected for the recommendation-service.
+
+A reference GitHub Actions run passes the PR head commit SHA and output location explicitly. Results are written to:
 
 ```text
 services/recommendation-service/target/evaluation-results/reference/

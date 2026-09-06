@@ -17,6 +17,8 @@ jobs:
   offline-evaluation:
     runs-on: ubuntu-latest
     timeout-minutes: 10
+    env:
+      EVALUATION_COMMIT_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-java@v4
@@ -32,16 +34,17 @@ jobs:
         run: >-
           mvn -B -ntp -pl services/recommendation-service -am
           -Dtest=RecommendationQualityEvaluationIT
+          -Dsurefire.failIfNoSpecifiedTests=false
           -Dgroups=evaluation
-          -Devaluation.commitSha=${GITHUB_SHA}
+          -Devaluation.commitSha=${EVALUATION_COMMIT_SHA}
           -Devaluation.outputDir=services/recommendation-service/target/evaluation-results/reference
-          -Devaluation.command='mvn -pl services/recommendation-service -am -Dtest=RecommendationQualityEvaluationIT -Dgroups=evaluation test'
+          -Devaluation.command='mvn -pl services/recommendation-service -am -Dtest=RecommendationQualityEvaluationIT -Dsurefire.failIfNoSpecifiedTests=false -Dgroups=evaluation test'
           test
       - name: Upload evaluation evidence
-        if: always()
+        if: success()
         uses: actions/upload-artifact@v4
         with:
-          name: recommendation-quality-evaluation-${{ github.sha }}
+          name: recommendation-quality-evaluation-${{ env.EVALUATION_COMMIT_SHA }}
           path: services/recommendation-service/target/evaluation-results/reference/
           if-no-files-found: error
           retention-days: 30
