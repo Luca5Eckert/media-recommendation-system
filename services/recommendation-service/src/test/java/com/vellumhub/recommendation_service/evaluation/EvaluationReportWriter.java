@@ -32,6 +32,8 @@ public final class EvaluationReportWriter {
                 .append("Dataset: `").append(metadata.datasetVersion()).append("` (seed `")
                 .append(metadata.seed()).append("`)  \n")
                 .append("Commit: `").append(metadata.commitSha()).append("`  \n")
+                .append("Embedding model: `").append(metadata.embeddingModel()).append("`  \n")
+                .append("Embedding provider: `").append(metadata.embeddingProvider()).append("`  \n")
                 .append("Users: ").append(metadata.users()).append(" · Books: ").append(metadata.books()).append("  \n")
                 .append("Candidate pool: ").append(metadata.candidatePoolSize())
                 .append(" · Combined weights: semantic ").append(format(metadata.semanticWeight()))
@@ -54,10 +56,12 @@ public final class EvaluationReportWriter {
         }
 
         markdown.append("\n## Protocol\n\n")
-                .append("- Profile vectors are built only from the profile/training split.\n")
+                .append("- Dataset records contain production-like text metadata, not hand-authored embedding vectors.\n")
+                .append("- Every book vector is generated at runtime from title, author, genres, and description through the production embedding provider/model.\n")
+                .append("- Profile vectors are built only from the profile/training split through the production `UserProfile` learning logic.\n")
                 .append("- Holdout relevant items never participate in profile construction.\n")
                 .append("- Already-interacted books are excluded for all three rankers.\n")
-                .append("- The v1 catalog is intentionally smaller than the production candidate pool so every eligible book is present before final ordering.\n")
+                .append("- The catalog is smaller than the production candidate pool so every eligible book is present before final ordering.\n")
                 .append("- `semantic-popularity` executes the same canonical SQL used by the production repository.\n")
                 .append("- `nDCG@10` is the primary comparison metric.\n")
                 .append("\n## Reproduce\n\n```bash\n")

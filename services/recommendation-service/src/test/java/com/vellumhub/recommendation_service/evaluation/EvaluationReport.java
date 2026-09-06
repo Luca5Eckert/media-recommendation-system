@@ -44,6 +44,8 @@ public final class EvaluationReport {
             String commitSha,
             String datasetVersion,
             long seed,
+            String embeddingModel,
+            String embeddingProvider,
             int users,
             int books,
             int profileInteractions,

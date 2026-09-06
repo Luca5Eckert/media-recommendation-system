@@ -3,7 +3,9 @@ package com.vellumhub.recommendation_service.evaluation;
 import com.vellumhub.recommendation_service.evaluation.SyntheticEvaluationDataset.Dataset;
 import com.vellumhub.recommendation_service.evaluation.SyntheticEvaluationDataset.EvaluationBook;
 import com.vellumhub.recommendation_service.evaluation.SyntheticEvaluationDataset.EvaluationUser;
+import com.vellumhub.recommendation_service.module.book_feature.infrastructure.embedding.LangChain4jEmbeddingBookProvider;
 import com.vellumhub.recommendation_service.module.book_feature.infrastructure.repository.RankingQueries;
+import dev.langchain4j.model.embedding.AllMiniLmL6V2EmbeddingModel;
 import org.flywaydb.core.Flyway;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
@@ -34,6 +36,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 class RecommendationQualityEvaluationIT {
 
     private static final int K = 10;
+    private static final int EMBEDDING_DIMENSIONS = 384;
 
     @Container
     static final PostgreSQLContainer<?> POSTGRES = new PostgreSQLContainer<>(
@@ -44,11 +47,13 @@ class RecommendationQualityEvaluationIT {
             .withPassword("evaluation");
 
     @Test
-    void evaluatesCurrentRankerAgainstExplicitBaselines() throws Exception {
+    void evaluatesProductionEmbeddingAndRankingPipelineAgainstExplicitBaselines() throws Exception {
         Dataset dataset = SyntheticEvaluationDataset.generate();
         assertThat(dataset.books().size() - SyntheticEvaluationDataset.PROFILE_INTERACTIONS_PER_USER)
-                .as("v1 evaluation catalog must fit inside the production candidate pool")
+                .as("evaluation catalog must fit inside the production candidate pool")
                 .isLessThanOrEqualTo(RankingQueries.CANDIDATE_POOL_SIZE);
+
+        Map<UUID, float[]> generatedEmbeddings = generateEmbeddingsWithProductionModel(dataset);
 
         DriverManagerDataSource dataSource = new DriverManagerDataSource(
                 POSTGRES.getJdbcUrl(), POSTGRES.getUsername(), POSTGRES.getPassword()
@@ -56,8 +61,7 @@ class RecommendationQualityEvaluationIT {
         Flyway.configure().dataSource(dataSource).load().migrate();
         NamedParameterJdbcTemplate jdbc = new NamedParameterJdbcTemplate(dataSource);
 
-        Map<UUID, EvaluationBook> booksById = SyntheticEvaluationDataset.booksById(dataset);
-        persistDataset(jdbc, dataset, booksById);
+        persistDataset(jdbc, dataset, generatedEmbeddings);
 
         List<EvaluationReport.UserResult> perUser = new ArrayList<>();
         Map<EvaluationRanker, Set<UUID>> coverage = new EnumMap<>(EvaluationRanker.class);
@@ -98,23 +102,49 @@ class RecommendationQualityEvaluationIT {
         assertThat(output.resolve("summary.md")).exists();
     }
 
+    private static Map<UUID, float[]> generateEmbeddingsWithProductionModel(Dataset dataset) {
+        var embeddingProvider = new LangChain4jEmbeddingBookProvider(new AllMiniLmL6V2EmbeddingModel());
+        Map<UUID, float[]> embeddingsByBookId = new LinkedHashMap<>();
+
+        for (EvaluationBook book : dataset.books()) {
+            float[] embedding = embeddingProvider.of(
+                    book.title(),
+                    book.author(),
+                    book.description(),
+                    book.genres()
+            );
+            assertThat(embedding)
+                    .as("production model must generate the pgvector schema dimension for %s", book.bookId())
+                    .hasSize(EMBEDDING_DIMENSIONS);
+            embeddingsByBookId.put(book.bookId(), embedding);
+        }
+
+        assertThat(embeddingsByBookId).hasSize(dataset.books().size());
+        return Map.copyOf(embeddingsByBookId);
+    }
+
     private static void persistDataset(
             NamedParameterJdbcTemplate jdbc,
             Dataset dataset,
-            Map<UUID, EvaluationBook> booksById
+            Map<UUID, float[]> generatedEmbeddings
     ) {
         for (EvaluationBook book : dataset.books()) {
+            float[] embedding = generatedEmbeddings.get(book.bookId());
+            if (embedding == null) {
+                throw new IllegalArgumentException("Missing generated embedding for book: " + book.bookId());
+            }
+
             jdbc.update("""
                     INSERT INTO book_features (book_id, embedding, popularity_score, last_updated)
                     VALUES (:bookId, CAST(:embedding AS vector), :popularity, now())
                     """, new MapSqlParameterSource()
                     .addValue("bookId", book.bookId())
-                    .addValue("embedding", vectorLiteral(book.embedding()))
+                    .addValue("embedding", vectorLiteral(embedding))
                     .addValue("popularity", book.popularityScore()));
         }
 
         for (EvaluationUser user : dataset.users()) {
-            float[] profileVector = SyntheticEvaluationDataset.buildProfileVector(user, booksById);
+            float[] profileVector = SyntheticEvaluationDataset.buildProfileVector(user, generatedEmbeddings);
             jdbc.update("""
                     INSERT INTO user_profiles (
                         user_id, profile_vector, interacted_book_ids,
@@ -206,7 +236,8 @@ class RecommendationQualityEvaluationIT {
         );
         String command = System.getProperty(
                 "evaluation.command",
-                "mvn -pl services/recommendation-service -am -Dtest=RecommendationQualityEvaluationIT -Dgroups=evaluation test"
+                "mvn -pl services/recommendation-service -am -Dtest=RecommendationQualityEvaluationIT "
+                        + "-Dsurefire.failIfNoSpecifiedTests=false -Dgroups=evaluation test"
         );
         return new EvaluationReport.RunMetadata(
                 "VellumHub",
@@ -214,6 +245,8 @@ class RecommendationQualityEvaluationIT {
                 commitSha,
                 dataset.version(),
                 dataset.seed(),
+                AllMiniLmL6V2EmbeddingModel.class.getName(),
+                LangChain4jEmbeddingBookProvider.class.getName(),
                 dataset.users().size(),
                 dataset.books().size(),
                 dataset.users().size() * SyntheticEvaluationDataset.PROFILE_INTERACTIONS_PER_USER,
@@ -228,7 +261,8 @@ class RecommendationQualityEvaluationIT {
                 Runtime.getRuntime().availableProcessors(),
                 Instant.now().toString(),
                 command,
-                "Synthetic offline benchmark; binary relevance; no production SLA or online-impact claim."
+                "Synthetic-text offline benchmark; book embeddings are generated at runtime by the production "
+                        + "AllMiniLmL6V2 pipeline; binary relevance; no production SLA or online-impact claim."
         );
     }
 

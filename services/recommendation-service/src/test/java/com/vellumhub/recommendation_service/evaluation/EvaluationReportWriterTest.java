@@ -27,14 +27,15 @@ class EvaluationReportWriterTest {
                 Map.of("ndcgAt10", new EvaluationReport.Uplift(0.2, 0.2857142857))
         );
         var raw = new EvaluationReport.RawResults(
-                "fixture-v1",
+                "fixture-v2",
                 1L,
                 10,
                 List.of(new EvaluationReport.UserResult(UUID.randomUUID(), EvaluationRanker.SEMANTIC_POPULARITY, List.of(), metrics)),
                 List.of(aggregate)
         );
         var metadata = new EvaluationReport.RunMetadata(
-                "VellumHub", "recommendation-quality", "abc123", "fixture-v1", 1L,
+                "VellumHub", "recommendation-quality", "abc123", "fixture-v2", 1L,
+                "AllMiniLmL6V2EmbeddingModel", "LangChain4jEmbeddingBookProvider",
                 1, 1, 1, 1, 200, 0.7, 0.3, 0, 1,
                 "21", "test-os", 1, "2026-09-06T00:00:00Z", "mvn test", "fixture"
         );
@@ -45,8 +46,17 @@ class EvaluationReportWriterTest {
         assertThat(tempDir.resolve("raw-results.json")).exists();
         assertThat(tempDir.resolve("summary.md")).exists();
         assertThat(Files.readString(tempDir.resolve("summary.md")))
-                .contains("nDCG@10", "semantic-popularity", "28.57%", "not a production SLA");
+                .contains(
+                        "nDCG@10",
+                        "semantic-popularity",
+                        "28.57%",
+                        "not a production SLA",
+                        "AllMiniLmL6V2EmbeddingModel",
+                        "production-like text metadata"
+                );
         assertThat(Files.readString(tempDir.resolve("raw-results.json")))
                 .contains("SEMANTIC_POPULARITY", "ndcgAt10");
+        assertThat(Files.readString(tempDir.resolve("run-metadata.json")))
+                .contains("AllMiniLmL6V2EmbeddingModel", "LangChain4jEmbeddingBookProvider");
     }
 }
