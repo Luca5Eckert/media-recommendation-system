@@ -37,11 +37,10 @@ jobs:
           -Dsurefire.failIfNoSpecifiedTests=false
           -Dgroups=evaluation
           -Devaluation.commitSha=${EVALUATION_COMMIT_SHA}
-          -Devaluation.outputDir=services/recommendation-service/target/evaluation-results/reference
+          -Devaluation.outputDir=${GITHUB_WORKSPACE}/services/recommendation-service/target/evaluation-results/reference
           -Devaluation.command='mvn -pl services/recommendation-service -am -Dtest=RecommendationQualityEvaluationIT -Dsurefire.failIfNoSpecifiedTests=false -Dgroups=evaluation test'
           test
       - name: Upload evaluation evidence
-        if: success()
         uses: actions/upload-artifact@v4
         with:
           name: recommendation-quality-evaluation-${{ env.EVALUATION_COMMIT_SHA }}
